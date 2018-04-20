@@ -2,9 +2,11 @@ package kr.ac.jejunu;
 
 import java.sql.*;
 
-public abstract class ProductDao {
+public class ProductDao {
+    private final ConnectionMaker connectionMaker = new JejuConnectionMaker();
+
     public Product get(Long id) throws ClassNotFoundException, SQLException {
-        Connection connection = getConnection();
+        Connection connection = connectionMaker.getConnection();
 
         PreparedStatement preparedStatement = connection.prepareStatement("select * from product where id = ?");
         preparedStatement.setLong(1, id);
@@ -25,7 +27,7 @@ public abstract class ProductDao {
     }
 
     public Long insert(Product product) throws ClassNotFoundException, SQLException {
-        Connection connection = getConnection();
+        Connection connection = connectionMaker.getConnection();
 
         PreparedStatement preparedStatement = connection.prepareStatement("insert into product (title, price) values (?,?);", Statement.RETURN_GENERATED_KEYS);
         preparedStatement.setString(1,product.getTitle());
@@ -44,9 +46,7 @@ public abstract class ProductDao {
         return id;
     }
 
-    public abstract Connection getConnection() throws ClassNotFoundException, SQLException;
-//    {
-//        Class.forName("com.mysql.jdbc.Driver");
-//        return DriverManager.getConnection("jdbc:mysql://localhost/jeju?characterEncoding=utf-8", "jeju", "jejupw");
-//    }
+    public Connection getConnection() throws ClassNotFoundException, SQLException{
+        return connectionMaker.getConnection();
+    }
 }
