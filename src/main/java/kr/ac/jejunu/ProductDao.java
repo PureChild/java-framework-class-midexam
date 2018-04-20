@@ -10,48 +10,90 @@ public class ProductDao {
         this.dataSource = dataSource;
     }
 
-    public Product get(Long id) throws ClassNotFoundException, SQLException {
-        Connection connection = dataSource.getConnection();
+    public Product get(Long id) throws SQLException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        Product product;
+        try {
+            connection = dataSource.getConnection();
 
-        PreparedStatement preparedStatement = connection.prepareStatement("select * from product where id = ?");
-        preparedStatement.setLong(1, id);
+            preparedStatement = connection.prepareStatement("select * from product where id = ?");
+            preparedStatement.setLong(1, id);
 
-        ResultSet resultSet = preparedStatement.executeQuery();
-        resultSet.next();
+            resultSet = preparedStatement.executeQuery();
+            resultSet.next();
 
-        Product product = new Product();
-        product.setId(resultSet.getLong("id"));
-        product.setTitle(resultSet.getString("title"));
-        product.setPrice(resultSet.getInt("price"));
-
-        resultSet.close();
-        preparedStatement.close();
-        connection.close();
-
+            product = new Product();
+            product.setId(resultSet.getLong("id"));
+            product.setTitle(resultSet.getString("title"));
+            product.setPrice(resultSet.getInt("price"));
+        } finally {
+            if(resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         return product;
     }
 
-    public Long insert(Product product) throws ClassNotFoundException, SQLException {
-        Connection connection = dataSource.getConnection();
+    public Long insert(Product product) throws SQLException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        Long id;
+        try {
+            connection = dataSource.getConnection();
 
-        PreparedStatement preparedStatement = connection.prepareStatement("insert into product (title, price) values (?,?);", Statement.RETURN_GENERATED_KEYS);
-        preparedStatement.setString(1,product.getTitle());
-        preparedStatement.setInt(2,product.getPrice());
-        preparedStatement.executeUpdate();
+            preparedStatement = connection.prepareStatement("insert into product (title, price) values (?,?);", Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1,product.getTitle());
+            preparedStatement.setInt(2,product.getPrice());
+            preparedStatement.executeUpdate();
 
-        ResultSet resultSet = preparedStatement.getGeneratedKeys();
-        resultSet.next();
+            resultSet = preparedStatement.getGeneratedKeys();
+            resultSet.next();
 
-        Long id = resultSet.getLong(1);
-
-        resultSet.close();
-        preparedStatement.close();
-        connection.close();
-
+            id = resultSet.getLong(1);
+        } finally {
+            if(resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         return id;
-    }
-
-    public Connection getConnection() throws ClassNotFoundException, SQLException{
-        return dataSource.getConnection();
     }
 }
